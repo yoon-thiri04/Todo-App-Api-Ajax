@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SignUp Page</title>
+<style>
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  margin-top:30px;
+  font-family: "Poppins", sans-serif;
+}
+
+.form_area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: #EDDCD9;
+  height: auto;
+  width: auto;
+  border: 2px solid #264143;
+  border-radius: 20px;
+  box-shadow: 3px 4px 0px 1px #E99F4C;
+}
+
+.title {
+  color: #264143;
+  font-weight: 900;
+  font-size: 1.5em;
+  margin-top: 20px;
+}
+
+.sub_title {
+  font-weight: 600;
+  margin: 5px 0;
+}
+
+.form_group {
+  display: flex;
+  flex-direction: column;
+  align-items: baseline;
+  margin: 10px;
+}
+
+.form_style {
+  outline: none;
+  border: 2px solid #264143;
+  box-shadow: 3px 4px 0px 1px #E99F4C;
+  width: 290px;
+  padding: 12px 10px;
+  border-radius: 4px;
+  font-size: 15px;
+}
+
+.form_style:focus, .btn:focus {
+  transform: translateY(4px);
+  box-shadow: 1px 2px 0px 0px #E99F4C;
+}
+
+.btn {
+  padding: 15px;
+  margin: 25px 0px;
+  width: 290px;
+  font-size: 15px;
+  background: #DE5499;
+  border-radius: 10px;
+  font-weight: 800;
+  box-shadow: 3px 3px 0px 0px #E99F4C;
+}
+
+.btn:hover {
+  opacity: .9;
+}
+
+.link {
+  font-weight: 800;
+  color: #264143;
+  padding: 5px;
+}
+</style>
+<body>
+<div class="container">
+    <div class="form_area">
+
+        <p class="title">SIGN UP</p>
+        <div id="form-wrapper">
+        <form  method="POST">
+            {% csrf_token %}
+            <div class="form_group">
+                <label class="sub_title" for="username">Username</label>
+                <input id="username" placeholder="Enter your full name" class="form_style" type="text" name="username">
+            </div>
+            <div id="username-error" style="color:red;"></div>
+            <div class="form_group">
+
+                <label class="sub_title" for="email">Email</label>
+                <input placeholder="Enter your email" id="email" class="form_style" type="email" name="email">
+            </div>
+            <div id="email-error" style="color:red;"></div>
+            <div class="form_group">
+                <label class="sub_title" for="password">Password</label>
+                <input  placeholder="Enter your password" id="password" class="form_style" type="password" name="pwd">
+            </div>
+            <div class="form_group">
+                <label class="sub_title" for="confirmpassword">Confirm Password</label>
+                <input  placeholder="Enter your password" id="confirmpassword" class="form_style" type="password" name="confirmpwd">
+            </div>
+                <div id="password-error" style="color:red;"></div>
+            <div>
+                <input type="submit" id="submit" value="SIGN UP" class="btn">
+                <p>Have an Account? <a class="link" href="/login">Login Here!</a></p>
+            </div>
+        </form>
+      </div>
+    </div>
+</div>
+
+<script>
+        function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+        var form = document.getElementById('form-wrapper')
+        form.addEventListener('submit', function(e) {
+            e.preventDefault()
+            console.log('Submit Clicked')
+            var url=`http://127.0.0.1:8000/api/signup/`
+
+            var username=document.getElementById('username').value
+            var email=document.getElementById('email').value
+            var password=document.getElementById('password').value
+            var confirm_password=document.getElementById('confirmpassword').value
+
+            fetch(url,{
+                    method : 'POST',
+                    headers : {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body : JSON.stringify(
+                                {
+                                    'username' : username,
+                                    'email' : email,
+                                    'password' :  password,
+                                    'confirm_password' : confirm_password,
+                    }),
+            }
+            ).then( (resp) => resp.json() )
+              .then( data => {
+                        if (data.error){
+                            console.log(data.error);
+                            if (data.error.password){
+                                document.getElementById('password-error').innerHTML = data.error.password;
+                            }
+                            if (data.error.username) {
+                                document.getElementById('username-error').innerHTML = data.error.username;
+                            }
+                            if (data.error.email) {
+                                document.getElementById('email-error').innerHTML = data.error.email;
+                            }
+
+                        }else {
+                            console.log('Signup Successful');
+                            window.location.href= '/login';
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        });
+
+
+        })
+
+</script>
+</body>
+</html>
